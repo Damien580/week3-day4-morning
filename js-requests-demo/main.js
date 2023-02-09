@@ -12,7 +12,7 @@ const newAgeInput = document.querySelector('#age')
 const newLikesText = document.querySelector('textarea')
 const charContainer = document.querySelector('section')
 
-// const baseURL = 
+const baseURL = 'http://localhost:4000'
 
 function createCharacterCard(char) {
   let charCard = document.createElement('div')
@@ -31,3 +31,72 @@ function createCharacterCard(char) {
 function clearCharacters() {
   charContainer.innerHTML = ``
 }
+
+const getAllChars = evt =>{
+  clearCharacters()
+axios.get(baseURL + '/Characters')
+.then((response) => {
+  let { data } = response
+  console.log(data)
+  data.forEach(charObj => createCharacterCard(charObj))
+    
+  })
+  .catch(err => console.log(err))
+}
+
+
+const getChar = evt =>{
+  clearCharacters()
+  console.log(evt.target)
+  let charName = evt.target.id
+  axios.get(baseURL + `/character/${charName}`)
+  .then(response => {
+    console.log(response.data)
+    createCharacterCard(response.data)
+  })
+  .catch(err => console.log(err))
+}
+
+const getCharAge = evt =>{
+  evt.preventDefault()
+  clearCharacters()
+  let age = ageInput.value
+  axios.get(baseURL + `/character?age=${age}`)
+    .then(response => {
+    console.log(response.data)
+    response.data.forEach(charObj => createCharacterCard(charObj))
+  })
+  .catch(err => console.log(err))
+}
+
+const createNewChar = evt =>{
+  evt.preventDefault()
+  clearCharacters()
+let newChar = {
+  firstName: newFirstInput.value,
+  lastName: newLastInput.value,
+  gender: newGenderDropDown.value,
+  age: newAgeInput.value,
+  likes: newLikesText.value.split(',')
+
+  }
+  axios.post(baseURL + '/character', newChar)
+  .then(response =>{
+    console.log(response.data)
+    let {data} = response
+    data.forEach(charObj => createCharacterCard(charObj))
+  })
+  .catch(err => console.log(err))
+}
+
+
+
+getAllBtn.addEventListener('click', getAllChars)
+
+for (i = 0; i < charBtns.length; i++){
+  charBtns[i].addEventListener('click', getChar)
+}
+
+ageForm.addEventListener('submit', getCharAge)
+
+createForm.addEventListener('submit', createNewChar)
